@@ -35,6 +35,44 @@ schotter sample.svg
 
 Run `schotter --help` to see the list of available options.
 
+## Animation
+
+Instead of randomizing every frame independently (which flickers), Schotter
+generates one target layout for the given `--seed` and lets each square travel
+on a straight line from its position on the ordered grid to its final
+position. Adjacent frames therefore differ by a constant, small displacement
+and the animation evolves smoothly from ordered to scattered.
+
+Export an animated GIF (held in memory, capped at 500 frames):
+
+```bash
+schotter --seed 42 --frames 24 --delay 8 animation.gif
+```
+
+Export an ordered PNG sequence (streamed one frame at a time, so memory stays
+bounded by a single frame regardless of length):
+
+```bash
+schotter --seed 42 --frames 24 'frame_%04d.png'
+```
+
+The same `--seed` always reproduces the same frames, and the last animation
+frame is pixel-identical to a single-frame render with the same parameters.
+`--disturbance 0` renders the perfectly ordered grid; values above 1 amplify
+the scatter. Existing outputs are never overwritten unless `--force` is
+passed, and an interrupted export (Ctrl-C) removes its partial file and exits
+with code 130.
+
+| Situation | Result |
+| --- | --- |
+| `--frames 0` (default) | Original single SVG mode, unchanged |
+| `--frames 1 out.png` | Single PNG of the final state |
+| Negative `--disturbance` / `--frames` | Usage error, exit code 2 |
+| GIF above 500 frames or 256 MiB of pixels | Runtime error, exit code 1, no file written |
+| PNG sequence above 100 000 frames, or canvas above 64 MP | Rejected before allocation |
+| Output path already exists | Error unless `--force` is given |
+| Ctrl-C during export | Partial file removed, exit code 130 |
+
 ## License
 
 Copyright (c) 2018 Thomas Jansen. Released under the

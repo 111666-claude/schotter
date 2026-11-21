@@ -1,0 +1,6 @@
+# Compiled binary
+/schotter
+
+# Test and export artifacts
+*.test
+*.out
